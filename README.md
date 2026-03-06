@@ -128,8 +128,8 @@ SENTINEL is a submission to the **"Secure & Govern MCP"** track of the [AI Agent
 
 ```bash
 # 1. Clone and configure
-git clone https://github.com/andrewespira/sentinel.git
-cd sentinel
+git clone https://github.com/espirado/agent-secure.git
+cd agent-secure
 cp .env.example .env
 # Fill in API keys (Datadog, Braintrust, Cleric, ElevenLabs)
 
