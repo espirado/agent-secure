@@ -1,38 +1,28 @@
-# 🛡 SENTINEL — AI Reasoning Observatory
+# SENTINEL — AI Reasoning Observatory
 
-> *"Every tool shows you what your AI agent decided. SENTINEL shows you whether you should have trusted it."*
+A governance layer for AI agents operating over MCP. SENTINEL audits agent reasoning quality — checking whether evidence was complete and current before a decision commits — and surfaces known failure patterns so operators can intervene early.
 
-**Hackathon Category: [Secure & Govern MCP](https://aihackathon.dev/)** — Security and governance of MCP/AI agents with agentgateway.
-
-Gartner's Guardian Agent category. Built for domain-specific reasoning fidelity, not just security compliance.
+Built for the **[Secure & Govern MCP](https://aihackathon.dev/)** track of the AI Agent & MCP Hackathon.
 
 ---
 
-## 🏆 Hackathon: MCP & AI Agents (aihackathon.dev)
+## What It Does
 
-SENTINEL is a submission to the **"Secure & Govern MCP"** track of the [AI Agent MCP Hackathon](https://aihackathon.dev/). It demonstrates how **agentgateway** can be used to secure, govern, and observe AI agent reasoning decisions at the MCP protocol layer.
+SENTINEL sits behind **agentgateway** and exposes four MCP tools that any MCP client can call:
 
-### What SENTINEL Adds to the Ecosystem
+| MCP Tool | Purpose |
+|----------|---------|
+| `sentinel_evaluate` | Audit a pending agent decision — score signal fidelity, match failure patterns, assign authority level |
+| `sentinel_reliability` | Return the historical reliability profile for a given agent |
+| `sentinel_patterns` | List known failure signatures with accuracy stats |
+| `sentinel_pull_decisions` | Pull agent decision events from Datadog for analysis |
 
-| Layer | Technology | What It Does |
-|-------|-----------|--------------|
-| **Connectivity** | agentgateway | MCP proxy with RBAC, session management, audit logging |
-| **Governance** | SENTINEL Authority Gate | Pre-decision interception: FULL_AUTO → QUARANTINE |
-| **Security** | agentgateway + CEL policies | Tool-level authorization (evaluate requires JWT auth) |
-| **Observability** | agentgateway + Datadog | Full MCP tool invocation audit trail |
-| **Reasoning Audit** | SENTINEL Fidelity Auditor | Signal-level evidence quality scoring |
-| **Pattern Detection** | SENTINEL Pattern Library | Learned failure signatures with historical accuracy |
+When `sentinel_evaluate` runs, it passes the decision through four stages:
 
----
-
-## The Problem Gap
-
-| Tool | What It Shows |
-|------|--------------|
-| Grafana Assistant | Execution trace — what the agent looked at |
-| Datadog Bits AI | Root cause of incidents — what went wrong |
-| Cleric | How to resolve incidents — what to do |
-| **SENTINEL** | **Whether the reasoning was structurally sound — before the decision committed** |
+1. **Signal Fidelity Auditor** — Was the evidence complete and current? (stale policy, incomplete docs, timed-out lookups)
+2. **Pattern Fingerprinter** — Does this match a known failure signature? (e.g. stale+incomplete → historically 23% accuracy)
+3. **Reliability Scorer** — What's the agent's historical accuracy for this context? Is calibration drifting?
+4. **Authority Gate** — Based on all of the above, assign: `FULL_AUTO` | `ACT_AND_NOTIFY` | `HUMAN_REQUIRED` | `QUARANTINE`
 
 ---
 
@@ -111,16 +101,16 @@ SENTINEL is a submission to the **"Secure & Govern MCP"** track of the [AI Agent
 
 ---
 
-## Sponsor Integration Map
+## Integrations
 
-| Sponsor / Project | Role in SENTINEL |
-|-------------------|-----------------|
-| **agentgateway** | MCP proxy — RBAC, session management, audit logging, CORS for SENTINEL tools |
-| **Datadog** | MCP Server — decision event ingestion + reliability metrics + drift monitors |
-| **Braintrust** | Eval store — every decision scored against ground truth outcomes |
-| **Cleric** | Incident creation — human billing specialist review with full context |
-| **ElevenLabs** | Morning voice brief — daily reliability report for ops standup |
-| **SENTINEL Dashboard** | Built-in dashboard — reliability heatmap, drift charts, pattern library, live feed |
+| Service | How SENTINEL Uses It |
+|---------|---------------------|
+| **agentgateway** | MCP proxy — routes MCP clients to SENTINEL tools with RBAC, session management, and audit logging |
+| **Datadog** | Decision event ingestion, reliability metrics, drift monitoring |
+| **Braintrust** | Eval store — scores each decision against ground truth outcomes |
+| **Cleric** | Creates incidents for human review when authority gate escalates |
+| **ElevenLabs** | Generates a daily voice brief summarizing overnight reliability |
+| **Dashboard** | Built-in observatory UI — reliability heatmap, drift charts, pattern library, live decision feed |
 
 ---
 
@@ -161,21 +151,6 @@ open http://localhost:15000/ui
 
 ---
 
-## Hackathon Build Timeline (5.5 hours)
-
-| Hour | Task |
-|------|------|
-| 0-0.5 | Install agentgateway, configure `agentgateway.yaml`, verify proxy |
-| 0.5-1 | Get API keys, run SENTINEL, verify agentgateway → SENTINEL MCP |
-| 1-2 | Wire Braintrust logging, verify eval spans appear |
-| 2-3 | Create Cleric incident manually, verify webhook |
-| 3-4 | ElevenLabs voice brief end-to-end |
-| 4-4.5 | Configure agentgateway RBAC policies, test tool authorization |
-| 4.5-5 | SENTINEL dashboard (reliability heatmap, drift charts, live feed) |
-| 5-5.5 | Demo polish, run full demo script with agentgateway |
-
----
-
 ## agentgateway Security Policies
 
 SENTINEL uses agentgateway's CEL-based MCP authorization to enforce tool-level access control:
@@ -201,20 +176,6 @@ This means:
 
 ---
 
-## The Pitch (30 seconds)
+## Why This Matters
 
-"Datadog just launched Bits AI SRE. Grafana just shipped Assistant Investigations. Cleric raised $9.8M building AI incident management. They all solve the same problem: react faster after something breaks.
-
-Nobody is asking: is the AI agent that's fixing your incidents actually reliable? SENTINEL is the first system to audit AI reasoning at the signal level — checking whether evidence was complete and current before the decision committed — and fingerprint the failure patterns that systematically precede wrong outcomes.
-
-In healthcare, that's not a developer tool. It's a patient safety layer. And Gartner just named this the fastest-growing category in AI for 2030."
-
----
-
-## Key Differentiators vs Competition
-
-- **vs Wayfound**: Business metrics monitoring vs reasoning-level fidelity auditing
-- **vs NeuralTrust**: Security/compliance guardrails vs calibration quality gates  
-- **vs Datadog Bits AI**: Incident responder vs reasoning auditor of the responder
-- **vs Grafana Investigations**: Shows you the trace vs shows you why the trace was wrong
-- **vs Cleric**: Human handoff layer vs the layer that decides *whether* to hand off
+As AI agents take on higher-stakes decisions — in healthcare billing, infrastructure management, financial operations — knowing *what* an agent did isn't enough. You need to know whether the reasoning behind the decision was sound *before* it commits. SENTINEL provides that governance layer, built on agentgateway's MCP security primitives.
