@@ -1,0 +1,64 @@
+SENTINEL DEMO SCRIPT
+
+
+OPENING — SENTINEL Dashboard
+
+Every AI agent tells you it's confident.
+SENTINEL tells you if that confidence is real.
+
+This is the SENTINEL Observatory.
+It watches MedAgent, our healthcare AI that handles prior authorizations.
+
+Look at the top. Overall accuracy across all payers: 70 percent.
+Calibration error: 17 percent. That means the agent thinks it's right way more than it actually is.
+
+Now look at the heatmap.
+UnitedHealthcare is green across the board. 85, 100, 85. Healthy.
+But Aetna — that's the problem.
+Eight weeks ago it was 67 percent. Today it's zero.
+MedAgent doesn't know this. Its confidence is still 89 percent.
+Nobody knew until SENTINEL started watching.
+
+Now look at the pattern library on the right.
+SENTINEL doesn't just flag problems — it fingerprints them.
+Pattern Delta: Stale plus Incomplete. 23 percent accuracy. Critical severity.
+That means when the agent reasons from an outdated policy and incomplete documents, it's wrong 77 percent of the time.
+
+The confidence versus reality chart tells the full story.
+The agent says 89 percent. Reality says 72 percent.
+That gap is the danger zone. That's where patients get wrong denials.
+
+
+TRANSITION — Press ENTER to switch
+
+
+AGENTGATEWAY UI
+
+Now let's talk about how we secure this.
+
+This is agentgateway. It sits between any MCP client and SENTINEL.
+Every tool call goes through here with enterprise-grade governance.
+
+Look at the tools.
+sentinel_patterns and sentinel_reliability are public. Anyone can read them. Transparency is free.
+But sentinel_evaluate requires JWT authentication. You can't run anonymous reasoning audits.
+And sentinel_pull_decisions requires an operator role. Production data from Datadog is protected.
+
+This is Secure and Govern MCP in action.
+Tool-level RBAC with CEL policies. Session management. Full audit trail.
+
+agentgateway provides the connectivity and governance layer.
+SENTINEL provides the reasoning fidelity audit.
+Together, any MCP client gets secure access to AI agent reasoning quality assessment.
+
+
+CLOSING
+
+Datadog shows you what your agents did.
+Grafana shows you how they performed.
+SENTINEL shows you whether you should have trusted them.
+
+In healthcare, this isn't a debugging tool.
+It's a patient safety layer.
+
+SENTINEL.

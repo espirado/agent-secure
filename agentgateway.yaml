@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────
+# SENTINEL × Agent Gateway Configuration
+# Category: "Secure & Govern MCP" — aihackathon.dev
+#
+# This config puts SENTINEL's MCP server behind agentgateway
+# for enterprise-grade security, observability, and governance
+# of AI agent reasoning decisions.
+#
+# Architecture:
+#   MCP Client (Claude/GPT/Custom) → agentgateway:3000 → SENTINEL MCP:8081
+#
+# Features enabled:
+#   ✓ MCP tool-level RBAC via CEL policies
+#   ✓ CORS for browser-based playground access
+#   ✓ Audit logging of all tool invocations
+#   ✓ Session management (Streamable HTTP)
+#   ✓ Per-tool authorization (evaluate requires auth, patterns is public)
+# ─────────────────────────────────────────────────────────────
+
+# yaml-language-server: $schema=https://agentgateway.dev/schema/config
+
+binds:
+  # ── Primary MCP Endpoint ─────────────────────────────────
+  # Clients connect here to access SENTINEL tools through agentgateway
+  - port: 3000
+    listeners:
+      - routes:
+          - policies:
+              # CORS — allow browser/playground connections
+              cors:
+                allowOrigins:
+                  - "*"
+                allowHeaders:
+                  - mcp-protocol-version
+                  - content-type
+                  - cache-control
+                  - authorization
+                exposeHeaders:
+                  - "Mcp-Session-Id"
+
+              # MCP-level authorization: tool-level RBAC
+              # Uses CEL expressions to control who can call what
+              mcpAuthorization:
+                rules:
+                  # sentinel_patterns — public, anyone can list failure signatures
+                  - 'mcp.tool.name == "sentinel_patterns"'
+
+                  # sentinel_reliability — public, read-only reliability data
+                  - 'mcp.tool.name == "sentinel_reliability"'
+
+                  # sentinel_evaluate — requires authentication
+                  # Only authenticated agents/users can run the evaluation pipeline
+                  - 'mcp.tool.name == "sentinel_evaluate" && has(jwt.sub)'
+
+                  # sentinel_pull_decisions — requires authentication + operator role
+                  # Pulling from Datadog is a privileged operation
+                  - 'mcp.tool.name == "sentinel_pull_decisions" && has(jwt.sub) && "operator" in jwt.roles'
+
+            backends:
+              - mcp:
+                  targets:
+                    # ── SENTINEL MCP Server ──────────────────
+                    # Connects to SENTINEL's Streamable HTTP MCP endpoint
+                    - name: sentinel
+                      mcp:
+                        host: http://localhost:8081/mcp
+
+  # ── Health/REST Endpoint (passthrough) ───────────────────
+  # Optional: expose SENTINEL's REST API through agentgateway too
+  - port: 3001
+    listeners:
+      - routes:
+          - policies:
+              cors:
+                allowOrigins:
+                  - "*"
+            backends:
+              - mcp:
+                  targets:
+                    - name: sentinel-rest
+                      mcp:
+                        host: http://localhost:8080/

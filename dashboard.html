@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL — AI Reasoning Observatory</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --surface-3: #22223a;
+    --border: #2a2a3d;
+    --text: #e4e4ef;
+    --text-dim: #8888a4;
+    --accent: #6366f1;
+    --accent-dim: #4f46e5;
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.15);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.15);
+    --yellow: #f59e0b;
+    --yellow-dim: rgba(245,158,11,0.15);
+    --orange: #f97316;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(180deg, rgba(99,102,241,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800;
+    color: white;
+  }
+  .header h1 {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+  }
+  .header h1 span { color: var(--accent); }
+  .header-subtitle {
+    font-size: 12px; color: var(--text-dim); margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .status-badge {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    background: var(--green-dim); color: var(--green);
+    border: 1px solid rgba(34,197,94,0.3);
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .agent-badge {
+    padding: 6px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    background: var(--surface-2); color: var(--text-dim);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Grid ── */
+  .dashboard {
+    padding: 24px 32px;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.3), transparent);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .card-badge {
+    padding: 3px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Stat Cards ── */
+  .stat-card { grid-column: span 3; }
+  .stat-value {
+    font-size: 36px; font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 12px; color: var(--text-dim);
+  }
+  .stat-change {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600;
+    margin-top: 8px; padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .stat-change.up { background: var(--green-dim); color: var(--green); }
+  .stat-change.down { background: var(--red-dim); color: var(--red); }
+  .stat-change.warn { background: var(--yellow-dim); color: var(--yellow); }
+
+  /* ── Heatmap ── */
+  .heatmap-card { grid-column: span 8; min-height: 320px; }
+  .heatmap-container { display: flex; flex-direction: column; gap: 12px; }
+  .heatmap-row {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .heatmap-label {
+    width: 140px; font-size: 13px; font-weight: 500;
+    text-align: right; flex-shrink: 0;
+  }
+  .heatmap-cells { display: flex; gap: 4px; flex: 1; }
+  .heatmap-cell {
+    flex: 1; height: 42px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: default;
+    position: relative;
+  }
+  .heatmap-cell:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    z-index: 2;
+  }
+  .heatmap-week-labels {
+    display: flex; gap: 4px; margin-left: 148px;
+  }
+  .heatmap-week-label {
+    flex: 1; text-align: center;
+    font-size: 10px; color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .drift-badge {
+    position: absolute; top: 6px; right: 6px;
+    font-size: 9px; padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--red); color: white;
+    font-weight: 700; letter-spacing: 0.5px;
+  }
+
+  /* ── Pattern Cards ── */
+  .patterns-card { grid-column: span 4; }
+  .pattern-list { display: flex; flex-direction: column; gap: 10px; }
+  .pattern-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    transition: border-color 0.2s;
+  }
+  .pattern-item:hover { border-color: var(--accent); }
+  .pattern-item-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 8px;
+  }
+  .pattern-name {
+    font-size: 14px; font-weight: 600;
+  }
+  .severity-badge {
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .severity-CRITICAL { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .severity-HIGH { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+  .severity-LOW { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .pattern-desc {
+    font-size: 12px; color: var(--text-dim); line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .pattern-accuracy {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pattern-accuracy-bar {
+    flex: 1; height: 6px; background: var(--surface-3);
+    border-radius: 3px; overflow: hidden;
+  }
+  .pattern-accuracy-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.8s ease-out;
+  }
+  .pattern-accuracy-val {
+    font-size: 13px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 42px; text-align: right;
+  }
+  .pattern-flags {
+    display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap;
+  }
+  .flag-tag {
+    font-size: 10px; padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Confidence Gap Chart ── */
+  .gap-card { grid-column: span 6; min-height: 300px; }
+  .gap-card canvas { max-height: 240px; }
+
+  /* ── Drift Chart ── */
+  .drift-card { grid-column: span 6; min-height: 300px; }
+  .drift-card canvas { max-height: 240px; }
+
+  /* ── Live Feed ── */
+  .feed-card { grid-column: span 12; }
+  .feed-container {
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .feed-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    border-left: 3px solid;
+    font-size: 13px;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .feed-item.blocked { border-left-color: var(--red); }
+  .feed-item.approved { border-left-color: var(--green); }
+  .feed-item.escalated { border-left-color: var(--yellow); }
+  .feed-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-dim);
+    min-width: 70px;
+  }
+  .feed-action {
+    font-weight: 600; min-width: 80px;
+  }
+  .feed-action.BLOCKED { color: var(--red); }
+  .feed-action.APPROVED { color: var(--green); }
+  .feed-action.ESCALATED { color: var(--yellow); }
+  .feed-detail { color: var(--text-dim); flex: 1; }
+  .feed-pattern {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--surface-3);
+    color: var(--text-dim);
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Loading ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    height: 100px; color: var(--text-dim); font-size: 14px;
+  }
+  .loading::after {
+    content: '';
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">S</div>
+    <div>
+      <h1><span>SENTINEL</span> Observatory</h1>
+      <div class="header-subtitle">AI Reasoning Fidelity Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="agent-badge">medagent-v2</div>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      LIVE
+    </div>
+  </div>
+</div>
+
+<!-- ── Dashboard Grid ── -->
+<div class="dashboard">
+
+  <!-- Stat Cards -->
+  <div class="card stat-card" id="stat-accuracy">
+    <div class="card-header">
+      <span class="card-title">Overall Accuracy</span>
+    </div>
+    <div class="stat-value" id="val-accuracy">--</div>
+    <div class="stat-label">across all payers</div>
+    <div class="stat-change down" id="change-accuracy">loading...</div>
+  </div>
+
+  <div class="card stat-card" id="stat-cal">
+    <div class="card-header">
+      <span class="card-title">Calibration Error</span>
+    </div>
+    <div class="stat-value" id="val-cal">--</div>
+    <div class="stat-label">confidence vs reality</div>
+    <div class="stat-change warn" id="change-cal">loading...</div>
+  </div>
+
+  <div class="card stat-card" id="stat-drift">
+    <div class="card-header">
+      <span class="card-title">Drift Alerts</span>
+    </div>
+    <div class="stat-value" style="color: var(--red);" id="val-drift">--</div>
+    <div class="stat-label">payers with declining accuracy</div>
+    <div class="stat-change down" id="change-drift">loading...</div>
+  </div>
+
+  <div class="card stat-card" id="stat-patterns">
+    <div class="card-header">
+      <span class="card-title">Critical Patterns</span>
+    </div>
+    <div class="stat-value" style="color: var(--yellow);" id="val-patterns">--</div>
+    <div class="stat-label">failure signatures active</div>
+    <div class="stat-change warn" id="change-patterns">loading...</div>
+  </div>
+
+  <!-- Reliability Heatmap -->
+  <div class="card heatmap-card">
+    <div class="card-header">
+      <span class="card-title">Reliability Heatmap — Weekly Accuracy by Payer</span>
+      <span class="card-badge" style="background: var(--red-dim); color: var(--red);">DRIFT DETECTED</span>
+    </div>
+    <div id="heatmap" class="loading">Loading reliability data</div>
+  </div>
+
+  <!-- Pattern Library -->
+  <div class="card patterns-card">
+    <div class="card-header">
+      <span class="card-title">Failure Pattern Library</span>
+    </div>
+    <div id="patterns" class="loading">Loading patterns</div>
+  </div>
+
+  <!-- Confidence Gap -->
+  <div class="card gap-card">
+    <div class="card-header">
+      <span class="card-title">Confidence vs Reality Gap</span>
+      <span class="card-badge" style="background: var(--yellow-dim); color: var(--yellow);">MISCALIBRATED</span>
+    </div>
+    <canvas id="gapChart"></canvas>
+  </div>
+
+  <!-- Drift Timeline -->
+  <div class="card drift-card">
+    <div class="card-header">
+      <span class="card-title">Aetna Accuracy Drift — 8 Weeks</span>
+      <span class="card-badge" style="background: var(--red-dim); color: var(--red);">↓ 67% → 0%</span>
+    </div>
+    <canvas id="driftChart"></canvas>
+  </div>
+
+  <!-- Live Decision Feed -->
+  <div class="card feed-card">
+    <div class="card-header">
+      <span class="card-title">Live Decision Feed</span>
+      <span class="card-badge" style="background: var(--surface-3); color: var(--text-dim);">SIMULATED</span>
+    </div>
+    <div id="feed" class="feed-container"></div>
+  </div>
+
+</div>
+
+<script>
+const BASE = 'http://localhost:8080';
+
+// ── Color scales ──
+function accuracyColor(val) {
+  if (val < 0) return 'var(--surface-3)';
+  if (val >= 0.85) return '#22c55e';
+  if (val >= 0.70) return '#84cc16';
+  if (val >= 0.55) return '#f59e0b';
+  if (val >= 0.40) return '#f97316';
+  return '#ef4444';
+}
+function accuracyTextColor(val) {
+  if (val < 0) return 'var(--text-dim)';
+  return '#fff';
+}
+
+// ── Fetch and render ──
+async function loadDashboard() {
+  try {
+    const [relRes, patRes] = await Promise.all([
+      fetch(`${BASE}/api/v1/reliability/medagent-v2`),
+      fetch(`${BASE}/api/v1/patterns`)
+    ]);
+    const reliability = await relRes.json();
+    const patterns = await patRes.json();
+
+    renderStats(reliability, patterns);
+    renderHeatmap(reliability);
+    renderPatterns(patterns);
+    renderGapChart(reliability);
+    renderDriftChart(reliability);
+    startFeed();
+  } catch (e) {
+    console.error('Failed to load dashboard:', e);
+    document.querySelectorAll('.loading').forEach(el => {
+      el.textContent = 'Failed to connect to SENTINEL API';
+    });
+  }
+}
+
+// ── Stats ──
+function renderStats(rel, pats) {
+  const acc = rel.overall_accuracy;
+  document.getElementById('val-accuracy').textContent = (acc * 100).toFixed(1) + '%';
+  document.getElementById('val-accuracy').style.color = acc < 0.75 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('change-accuracy').textContent = acc < 0.75 ? '▼ Below threshold' : '✓ Healthy';
+  document.getElementById('change-accuracy').className = 'stat-change ' + (acc < 0.75 ? 'down' : 'up');
+
+  const cal = rel.calibration_error;
+  document.getElementById('val-cal').textContent = (cal * 100).toFixed(1) + '%';
+  document.getElementById('val-cal').style.color = cal > 0.10 ? 'var(--yellow)' : 'var(--green)';
+  document.getElementById('change-cal').textContent = cal > 0.10 ? '⚠ Overconfident' : '✓ Calibrated';
+  document.getElementById('change-cal').className = 'stat-change ' + (cal > 0.10 ? 'warn' : 'up');
+
+  const driftCount = rel.drift_detected ? rel.drift_detected.length : 0;
+  document.getElementById('val-drift').textContent = driftCount;
+  document.getElementById('change-drift').textContent = driftCount > 0 ? '▼ ' + rel.drift_detected.join(', ') : '✓ No drift';
+  document.getElementById('change-drift').className = 'stat-change ' + (driftCount > 0 ? 'down' : 'up');
+
+  const criticalPats = pats.filter(p => p.severity === 'CRITICAL').length;
+  document.getElementById('val-patterns').textContent = criticalPats;
+  document.getElementById('change-patterns').textContent = criticalPats + ' critical, ' + pats.filter(p => p.severity === 'HIGH').length + ' high';
+}
+
+// ── Heatmap ──
+function renderHeatmap(rel) {
+  const container = document.getElementById('heatmap');
+  container.className = 'heatmap-container';
+  container.innerHTML = '';
+
+  // Week labels
+  const weekLabels = document.createElement('div');
+  weekLabels.className = 'heatmap-week-labels';
+  const weekNames = ['8w ago', '7w ago', '6w ago', '5w ago', '4w ago', '3w ago', '2w ago', 'This wk'];
+  weekNames.forEach(w => {
+    const lbl = document.createElement('div');
+    lbl.className = 'heatmap-week-label';
+    lbl.textContent = w;
+    weekLabels.appendChild(lbl);
+  });
+  container.appendChild(weekLabels);
+
+  rel.by_payer.forEach(payer => {
+    const row = document.createElement('div');
+    row.className = 'heatmap-row';
+
+    const label = document.createElement('div');
+    label.className = 'heatmap-label';
+    label.innerHTML = payer.payer;
+    if (payer.drift_flag) {
+      label.innerHTML += ' <span style="color:var(--red);font-size:11px;">⚠ DRIFT</span>';
+    }
+    row.appendChild(label);
+
+    const cells = document.createElement('div');
+    cells.className = 'heatmap-cells';
+
+    payer.weekly_accuracy.forEach((val, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      if (val < 0) {
+        cell.style.background = 'var(--surface-3)';
+        cell.style.color = 'var(--text-dim)';
+        cell.textContent = '—';
+      } else {
+        cell.style.background = accuracyColor(val);
+        cell.style.color = accuracyTextColor(val);
+        cell.textContent = (val * 100).toFixed(0) + '%';
+      }
+      cell.title = `${payer.payer} — Week ${i + 1}: ${val < 0 ? 'No data' : (val * 100).toFixed(1) + '%'}`;
+      cells.appendChild(cell);
+    });
+
+    row.appendChild(cells);
+    container.appendChild(row);
+  });
+}
+
+// ── Patterns ──
+function renderPatterns(patterns) {
+  const container = document.getElementById('patterns');
+  container.className = 'pattern-list';
+  container.innerHTML = '';
+
+  // Sort: CRITICAL first, then HIGH, then LOW
+  const order = { CRITICAL: 0, HIGH: 1, LOW: 2 };
+  patterns.sort((a, b) => (order[a.severity] || 3) - (order[b.severity] || 3));
+
+  patterns.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'pattern-item';
+
+    const accColor = p.accuracy >= 0.70 ? 'var(--green)' : p.accuracy >= 0.45 ? 'var(--yellow)' : 'var(--red)';
+
+    item.innerHTML = `
+      <div class="pattern-item-header">
+        <span class="pattern-name">${p.name}</span>
+        <span class="severity-badge severity-${p.severity}">${p.severity}</span>
+      </div>
+      <div class="pattern-desc">${p.failure_mode}</div>
+      <div class="pattern-accuracy">
+        <span style="font-size:11px;color:var(--text-dim);">Accuracy</span>
+        <div class="pattern-accuracy-bar">
+          <div class="pattern-accuracy-fill" style="width:${p.accuracy*100}%;background:${accColor};"></div>
+        </div>
+        <span class="pattern-accuracy-val" style="color:${accColor};">${(p.accuracy*100).toFixed(0)}%</span>
+      </div>
+      ${p.trigger_flags && p.trigger_flags.length > 0 ? `
+        <div class="pattern-flags">
+          ${p.trigger_flags.map(f => `<span class="flag-tag">${f}</span>`).join('')}
+        </div>
+      ` : ''}
+    `;
+    container.appendChild(item);
+  });
+}
+
+// ── Confidence Gap Chart ──
+function renderGapChart(rel) {
+  const ctx = document.getElementById('gapChart').getContext('2d');
+  const gap = rel.confidence_reality_gap;
+  const bands = Object.keys(gap).sort();
+  const stated = bands.map(b => (gap[b].stated_mean * 100).toFixed(1));
+  const actual = bands.map(b => (gap[b].actual_accuracy * 100).toFixed(1));
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: bands,
+      datasets: [
+        {
+          label: 'Agent Says',
+          data: stated,
+          backgroundColor: 'rgba(99,102,241,0.7)',
+          borderColor: '#6366f1',
+          borderWidth: 1,
+          borderRadius: 6,
+          barPercentage: 0.4,
+          categoryPercentage: 0.6,
+        },
+        {
+          label: 'Reality',
+          data: actual,
+          backgroundColor: 'rgba(239,68,68,0.7)',
+          borderColor: '#ef4444',
+          borderWidth: 1,
+          borderRadius: 6,
+          barPercentage: 0.4,
+          categoryPercentage: 0.6,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#8888a4', font: { family: 'Inter', size: 12 } }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#8888a4', font: { family: 'JetBrains Mono', size: 11 } },
+          grid: { color: 'rgba(42,42,61,0.5)' }
+        },
+        y: {
+          min: 0, max: 100,
+          ticks: {
+            color: '#8888a4',
+            font: { family: 'JetBrains Mono', size: 11 },
+            callback: v => v + '%'
+          },
+          grid: { color: 'rgba(42,42,61,0.5)' }
+        }
+      }
+    }
+  });
+}
+
+// ── Drift Chart ──
+function renderDriftChart(rel) {
+  const ctx = document.getElementById('driftChart').getContext('2d');
+  const aetna = rel.by_payer.find(p => p.payer === 'Aetna');
+  const uhc = rel.by_payer.find(p => p.payer === 'UnitedHealthcare');
+
+  const weeks = ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Wk 5', 'Wk 6', 'Wk 7', 'Wk 8'];
+
+  function cleanData(arr) {
+    return arr.map(v => v < 0 ? null : (v * 100).toFixed(1));
+  }
+
+  const datasets = [];
+  if (aetna) {
+    datasets.push({
+      label: 'Aetna',
+      data: cleanData(aetna.weekly_accuracy),
+      borderColor: '#ef4444',
+      backgroundColor: 'rgba(239,68,68,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 5,
+      pointHoverRadius: 8,
+      borderWidth: 2.5,
+    });
+  }
+  if (uhc) {
+    datasets.push({
+      label: 'UnitedHealthcare',
+      data: cleanData(uhc.weekly_accuracy),
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 5,
+      pointHoverRadius: 8,
+      borderWidth: 2.5,
+    });
+  }
+
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: weeks, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#8888a4', font: { family: 'Inter', size: 12 } }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#8888a4', font: { family: 'JetBrains Mono', size: 11 } },
+          grid: { color: 'rgba(42,42,61,0.5)' }
+        },
+        y: {
+          min: 0, max: 100,
+          ticks: {
+            color: '#8888a4',
+            font: { family: 'JetBrains Mono', size: 11 },
+            callback: v => v + '%'
+          },
+          grid: { color: 'rgba(42,42,61,0.5)' }
+        }
+      }
+    }
+  });
+}
+
+// ── Live Feed ──
+const feedItems = [
+  { time: '14:23:41', action: 'BLOCKED', detail: 'Aetna prior auth — Humira J0135 — stale policy detected', pattern: 'Stale+Incomplete', cls: 'blocked' },
+  { time: '14:22:18', action: 'APPROVED', detail: 'UHC prior auth — Keytruda J9271 — full signal fidelity', pattern: 'Clean Retrieval', cls: 'approved' },
+  { time: '14:21:05', action: 'BLOCKED', detail: 'Aetna eligibility — Enbrel J1438 — timeout cascade on step therapy docs', pattern: 'Timeout Cascade', cls: 'blocked' },
+  { time: '14:19:42', action: 'APPROVED', detail: 'UHC prior auth — Remicade J1745 — all signals current', pattern: 'Clean Retrieval', cls: 'approved' },
+  { time: '14:18:30', action: 'ESCALATED', detail: 'Aetna prior auth — Stelara J3357 — confidence 91% but payer accuracy 43%', pattern: 'Confidence Mismatch', cls: 'escalated' },
+  { time: '14:17:11', action: 'APPROVED', detail: 'UHC eligibility — Humira J0135 — step therapy documented', pattern: 'Clean Retrieval', cls: 'approved' },
+  { time: '14:16:03', action: 'BLOCKED', detail: 'Aetna prior auth — Dupixent J0593 — weight inversion on patient history', pattern: 'Weight Inversion', cls: 'blocked' },
+  { time: '14:14:55', action: 'APPROVED', detail: 'UHC prior auth — Opdivo J9299 — all criteria met', pattern: 'Clean Retrieval', cls: 'approved' },
+];
+
+function startFeed() {
+  const container = document.getElementById('feed');
+  let idx = 0;
+
+  function addItem() {
+    const item = feedItems[idx % feedItems.length];
+    const now = new Date();
+    const timeStr = now.toTimeString().slice(0, 8);
+
+    const el = document.createElement('div');
+    el.className = `feed-item ${item.cls}`;
+    el.innerHTML = `
+      <span class="feed-time">${timeStr}</span>
+      <span class="feed-action ${item.action}">${item.action}</span>
+      <span class="feed-detail">${item.detail}</span>
+      <span class="feed-pattern">${item.pattern}</span>
+    `;
+
+    container.insertBefore(el, container.firstChild);
+    if (container.children.length > 12) {
+      container.removeChild(container.lastChild);
+    }
+
+    idx++;
+  }
+
+  // Add first 4 immediately
+  for (let i = 0; i < 4; i++) {
+    addItem();
+  }
+
+  // Then add one every 3 seconds
+  setInterval(addItem, 3000);
+}
+
+// ── Init ──
+loadDashboard();
+</script>
+
+</body>
+</html>

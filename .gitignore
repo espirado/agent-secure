@@ -1,0 +1,28 @@
+# Binaries
+/sentinel
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Environment
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# PID files
+.sentinel.pid
+.agentgateway.pid
+
+# Build
+/tmp/
