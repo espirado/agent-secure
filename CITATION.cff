@@ -1,0 +1,87 @@
+cff-version: 1.2.0
+message: "If you use SENTINEL in your research or reference its governance design, please cite the accompanying paper and this software artifact."
+type: software
+title: "SENTINEL: AI Reasoning Observatory for MCP Agent Governance"
+abstract: >
+  SENTINEL is an MCP-native governance layer for AI agents. It audits the
+  reasoning that underlies pending agent decisions --- scoring signal
+  fidelity (was the evidence complete and current?), matching known failure
+  signatures, computing historical reliability, and assigning an authority
+  tier (FULL_AUTO, ACT_AND_NOTIFY, HUMAN_REQUIRED, QUARANTINE) --- before
+  irreversible actions commit. It is deployed behind agentgateway and
+  exposes four MCP tools (sentinel_evaluate, sentinel_reliability,
+  sentinel_patterns, sentinel_pull_decisions) usable by any MCP client.
+  This repository is the MCP-native reference implementation of the
+  mid-reasoning interception framework described in the companion paper,
+  "SENTINEL: A Mid-Reasoning Interception Framework for Auditing Medical
+  AI Agents in Production."
+authors:
+  - family-names: Espira
+    given-names: Andrew
+    orcid: https://orcid.org/0009-0002-9196-8094
+    affiliation: "Kustode; Department of Data Science, Saint Peter's University"
+    email: andrew@kustode.com
+repository-code: "https://github.com/espirado/SENTINEL"
+url: "https://github.com/espirado/SENTINEL"
+version: "1.0.0"
+date-released: "2026-04-20"
+license: MIT
+keywords:
+  - AI agents
+  - MCP
+  - Model Context Protocol
+  - agent governance
+  - reasoning audit
+  - reliability
+  - calibration
+  - medical AI
+  - healthcare AI safety
+  - agentgateway
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.PENDING"
+    description: "Concept DOI (resolves to latest release) for the SENTINEL software artifact on Zenodo."
+  - type: url
+    value: "https://github.com/espirado/SENTINEL/releases/tag/v1.0.0"
+    description: "GitHub release v1.0.0 archived on Zenodo."
+preferred-citation:
+  type: article
+  title: "SENTINEL: A Mid-Reasoning Interception Framework for Auditing Medical AI Agents in Production"
+  authors:
+    - family-names: Espira
+      given-names: Andrew
+      orcid: https://orcid.org/0009-0002-9196-8094
+      affiliation: "Kustode; Department of Data Science, Saint Peter's University"
+      email: andrew@kustode.com
+  year: 2026
+  abstract: >
+    Medical AI agents can reason incorrectly faster than humans can
+    intervene. SENTINEL is a mid-reasoning interception framework that
+    audits agent reasoning traces before irreversible healthcare decisions
+    execute, evaluating evidence quality across four dimensions
+    (completeness, currency, weighting, contradiction) and gating actions
+    through three tiers: auto-proceed, notify-proceed, and escalate.
+    Evaluated on 950 agent reasoning traces across three agent types in a
+    production healthcare revenue cycle management platform, SENTINEL
+    achieves a 55/18/27% green/yellow/red tier distribution, P99 audit
+    latency of 15,006 ms, and identifies 9.3% of traces with evidence
+    quality issues that the agents' own confidence scores do not flag.
+    Critically, SENTINEL detected 249 security-relevant reasoning events
+    (PHI exposure, unsafe failover suggestions, unsupervised
+    treatment-affecting decisions) that no existing agent self-confidence
+    mechanism surfaces.
+  keywords:
+    - AI agents
+    - medical AI safety
+    - reasoning audit
+    - mid-reasoning interception
+    - MCP
+    - Model Context Protocol
+    - healthcare AI
+    - PHI
+    - RCM
+    - calibration
+  identifiers:
+    - type: doi
+      value: "10.5281/zenodo.PENDING-PAPER"
+      description: "DOI of the SENTINEL paper PDF deposited on Zenodo."

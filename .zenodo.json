@@ -1,0 +1,52 @@
+{
+  "title": "SENTINEL: AI Reasoning Observatory for MCP Agent Governance (v1.0.0)",
+  "description": "<p><strong>SENTINEL</strong> is an MCP-native governance layer for AI agents. It audits the reasoning behind a pending agent decision &mdash; scoring signal fidelity (was evidence complete and current?), matching known failure signatures, computing historical reliability, and assigning an authority tier (<code>FULL_AUTO</code>, <code>ACT_AND_NOTIFY</code>, <code>HUMAN_REQUIRED</code>, <code>QUARANTINE</code>) &mdash; <em>before</em> irreversible actions commit.</p><p>This repository is the MCP-native reference implementation of the mid-reasoning interception framework described in the companion paper, <em>SENTINEL: A Mid-Reasoning Interception Framework for Auditing Medical AI Agents in Production</em>. It is deployed behind <a href='https://agentgateway.dev'>agentgateway</a> and exposes four MCP tools (<code>sentinel_evaluate</code>, <code>sentinel_reliability</code>, <code>sentinel_patterns</code>, <code>sentinel_pull_decisions</code>) usable by any MCP client.</p><p>Release <strong>v1.0.0</strong> archives the first end-to-end working build: Go MCP server, agentgateway CEL-based authorization, dashboard UI, Datadog / Braintrust / Cleric / ElevenLabs integrations, and a reproducible <code>start_demo.sh</code> entry point.</p>",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "version": "1.0.0",
+  "language": "eng",
+  "creators": [
+    {
+      "name": "Espira, Andrew",
+      "affiliation": "Kustode; Department of Data Science, Saint Peter's University",
+      "orcid": "0009-0002-9196-8094"
+    }
+  ],
+  "keywords": [
+    "AI agents",
+    "MCP",
+    "Model Context Protocol",
+    "agent governance",
+    "reasoning audit",
+    "reliability",
+    "calibration",
+    "authority gating",
+    "medical AI safety",
+    "agentgateway"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/espirado/SENTINEL",
+      "relation": "isSupplementTo",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/espirado/SENTINEL/releases/tag/v1.0.0",
+      "relation": "isVersionOf",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.5281/zenodo.PENDING-PAPER",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-preprint",
+      "scheme": "doi"
+    }
+  ],
+  "communities": [
+    {"identifier": "iss26"}
+  ],
+  "notes": "If you use SENTINEL, please cite both the software (this DOI) and the companion paper DOI listed under related identifiers."
+}

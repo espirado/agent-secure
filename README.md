@@ -1,8 +1,13 @@
 # SENTINEL — AI Reasoning Observatory
 
+[![DOI (software)](https://img.shields.io/badge/DOI-pending-lightgrey.svg)](https://doi.org/10.5281/zenodo.PENDING)
+[![DOI (paper)](https://img.shields.io/badge/Paper%20DOI-pending-lightgrey.svg)](https://doi.org/10.5281/zenodo.PENDING-PAPER)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/espirado/SENTINEL/releases/tag/v1.0.0)
+
 A governance layer for AI agents operating over MCP. SENTINEL audits agent reasoning quality — checking whether evidence was complete and current before a decision commits — and surfaces known failure patterns so operators can intervene early.
 
-Built for the **[Secure & Govern MCP](https://aihackathon.dev/)** track of the AI Agent & MCP Hackathon.
+This repository is the MCP-native reference implementation of the framework described in the companion paper — [_SENTINEL: A Mid-Reasoning Interception Framework for Auditing Medical AI Agents in Production_](#cite-this-work). Originally built for the **[Secure & Govern MCP](https://aihackathon.dev/)** track of the AI Agent & MCP Hackathon.
 
 ---
 
@@ -118,8 +123,8 @@ When `sentinel_evaluate` runs, it passes the decision through four stages:
 
 ```bash
 # 1. Clone and configure
-git clone https://github.com/espirado/agent-secure.git
-cd agent-secure
+git clone https://github.com/espirado/SENTINEL.git
+cd SENTINEL
 cp .env.example .env
 # Fill in API keys (Datadog, Braintrust, Cleric, ElevenLabs)
 
@@ -179,3 +184,44 @@ This means:
 ## Why This Matters
 
 As AI agents take on higher-stakes decisions — in healthcare billing, infrastructure management, financial operations — knowing *what* an agent did isn't enough. You need to know whether the reasoning behind the decision was sound *before* it commits. SENTINEL provides that governance layer, built on agentgateway's MCP security primitives.
+
+---
+
+## Cite This Work
+
+If you use SENTINEL in research or production, please cite **both** the software artifact and the companion paper.
+
+### Paper
+
+> Espira, A. (2026). *SENTINEL: A Mid-Reasoning Interception Framework for Auditing Medical AI Agents in Production.* Zenodo. https://doi.org/10.5281/zenodo.PENDING-PAPER
+
+```bibtex
+@article{espira2026sentinel,
+  title   = {SENTINEL: A Mid-Reasoning Interception Framework for Auditing Medical AI Agents in Production},
+  author  = {Espira, Andrew},
+  year    = {2026},
+  doi     = {10.5281/zenodo.PENDING-PAPER},
+  note    = {Preprint, archived on Zenodo}
+}
+```
+
+### Software (this repository)
+
+> Espira, A. (2026). *SENTINEL: AI Reasoning Observatory for MCP Agent Governance* (Version v1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.PENDING
+
+```bibtex
+@software{espira2026sentinel_code,
+  author  = {Espira, Andrew},
+  title   = {{SENTINEL}: AI Reasoning Observatory for MCP Agent Governance},
+  year    = {2026},
+  version = {v1.0.0},
+  doi     = {10.5281/zenodo.PENDING},
+  url     = {https://github.com/espirado/SENTINEL}
+}
+```
+
+A machine-readable citation is also provided in [`CITATION.cff`](CITATION.cff), and Zenodo-specific metadata lives in [`.zenodo.json`](.zenodo.json).
+
+## License
+
+[MIT](LICENSE) &copy; 2026 Andrew Espira.
